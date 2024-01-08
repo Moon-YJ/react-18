@@ -1,0 +1,13 @@
+.News {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  padding: 10vw;
+  background-color: lightpink;
+  overflow: hidden;
+  .box {
+    width: 50vh;
+    height: 50vh;
+    background-color: #fff;
+  }
+}
