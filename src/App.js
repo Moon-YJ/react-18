@@ -1,9 +1,11 @@
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, Suspense } from "react";
 import News from "./components/news/News";
 import Pics from "./components/pics/Pics";
 import Visual from "./components/visual/Visual";
 import "./global.scss";
 import { flushSync } from "react-dom";
+import useGetData from "./useGetData";
+import Post from "./components/post/Post";
 
 function App() {
   console.log("re-render");
@@ -12,6 +14,8 @@ function App() {
   const [Count3, setCount3] = useState(2);
   const [Items, setItems] = useState([]);
   const [isPending, startTransition] = useTransition();
+
+  const data = useGetData();
 
   // Auto Batching 테스트
   const returnPromise = () => {
@@ -49,6 +53,10 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    console.log(data);
+  }, []);
+
   return (
     <div className="App">
       {/* Auto Batching 테스트 */}
@@ -69,6 +77,10 @@ function App() {
           <li key={num}>{num}</li>
         ))}
       </ul>
+      <Suspense fallback={<p>Loading...</p>}>
+        <h1>Post List</h1>
+        <Post />
+      </Suspense>
       <Visual />
       <News />
       <Pics />
@@ -91,6 +103,7 @@ export default App;
     : 따라서 특정 핸들러 함수에 의해서 화면을 재연산해야하는 경우, 중간에 무거운 로직이 실행되는 연산이 있다면 굳이 무거운 연산이 필요없는 컴포넌트까지 같이 지연 됨 ==> 전반적인 로딩 속도에 악영향
 
   - useTransition 주로 사용하는 사례 (hydration 처리할때)
+    : hydration - 초기 HTML 페이지를 렌더링한 후에 클라이언트 측에서 추가적인 데이터를 가져와서 웹 페이지를 업데이트하는 프로세스(전통적인 서버 사이드 렌더링(SSR)과 클라이언트 사이드 렌더링(CSR)의 중간점에 위치하며, 더 나은 성능과 사용자 경험을 제공하기 위해 사용)
     : 굳이 데이터 fetching이 필요없는 정적인 콘텐츠를 먼저 빠르게 화면에 출력하고나서
     : 서버나 외부 API에서 불러와야되는 비동기 데이터를 나중에 선별적으로 호출할때
 
@@ -136,4 +149,7 @@ export default App;
   useTransition vs Suspense의 차이
     - useTransition은 컴포넌트간의 동기화 처리가 아닌, 동시에 실행되는 비동기 방식이지만 startTransition으로 묶어놓은 연산의 우선순위가 밀리는 것 뿐
     - Suspense는 해당 컴포넌트에서 관리하는 promise객체의 상태를 실시간으로 감시하면서 pending이 끝났을때 동기적으로 컴포넌트를 호출
+
+  Suspense 사용 조건
+    - Suspense로 동기화시키는 컴포넌트 내부에 Promise객체의 상태변화를 추적할 수 있는 로직이 구현되어야함
 */
